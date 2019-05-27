@@ -28,19 +28,21 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
       timer = new Timer(10, this);
       timer.start();
       
-      player = new Player(PREF_W / 2 - 50, PREF_H / 2 - 50, 100, 100, 10, -35, 1.75, new Rectangle(PREF_W, PREF_H));
-      core = new Core(PREF_W / 2 - 50, PREF_H - 150, 100, 150, 0, new Rectangle(PREF_W, PREF_H), 100);
+      player = new Player(PREF_W / 2 - 50, PREF_H / 2 - 50, 100, 100, 10, -35, 1.75, 100, new Rectangle(PREF_W, PREF_H));
+      core = new Core(PREF_W / 2 - 50, PREF_H - 150, 100, 150, 0, new Rectangle(PREF_W, PREF_H), 200);
       enemies = new ArrayList<Enemy>();
       for (int i = 0; i < 10; i++) {
-         enemies.add(new Enemy(0, PREF_H - 120, 50, 140, 3, new Rectangle(PREF_W, PREF_H)));
+         enemies.add(new Enemy(0, PREF_H - 120, 50, 140, 2, new Rectangle(PREF_W, PREF_H)));
       }
       obstacles = new ArrayList<Obstacle>();
-      
+            
       this.setFocusable(true);
       this.addKeyListener(this);
       this.setBackground(Color.WHITE);
       this.addMouseListener(this);
       this.addMouseMotionListener(this);
+      
+      reset();
       
    }
 
@@ -53,8 +55,8 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
       g2.setFont(font);
       g2.setColor(Color.RED);
       //PAINT TO THE PANEL HERE
-      g2.drawString("Hello, World!", 280, 300);
-      
+      g2.drawString("Core health: " + core.getHealth(), 280, 300);
+      g2.drawString("Player health: " + player.getHealth(), 220, 200);
       
       g2.setColor(Color.BLUE);
       
@@ -71,11 +73,20 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
    }
    
    private void update() {
-      player.update();
       for (Enemy enemy : enemies) {
          enemy.update();
+         enemy.interactUpdate(player, core);
       }
+      player.update();
       repaint();
+   }
+   
+   private boolean isGameOver() {
+      return false;
+   }
+   
+   private void reset() {
+      
    }
    
    @Override
@@ -179,5 +190,4 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
       });
    }
 
-   
 }

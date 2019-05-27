@@ -6,9 +6,9 @@ import java.awt.Shape;
 
 public class Core extends Tangible {
    
-   private int health;
+   private double health;
 
-   public Core(double x, double y, double width, double height, double dx, Rectangle bounds, int health) {
+   public Core(double x, double y, double width, double height, double dx, Rectangle bounds, double health) {
       super(x, y, width, height, dx, bounds);
       this.health = health;
    }
@@ -22,11 +22,11 @@ public class Core extends Tangible {
    public void update() {
    }
    
-   public int getHealth() {
+   public double getHealth() {
       return health;
    }
 
-   public void setHealth(int health) {
+   public void setHealth(double health) {
       this.health = health;
    }
 

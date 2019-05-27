@@ -12,9 +12,10 @@ public class Player extends Tangible {
    private boolean left, right, jumping, falling;
    private boolean facingLeft, facingRight;
    private boolean isFiring;
+   private double health;
    private ArrayList<Bullet> ammo;
    
-   public Player(double x, double y, double width, double height, double dx, double jumpStart, double gravity, Rectangle bounds) {
+   public Player(double x, double y, double width, double height, double dx, double jumpStart, double gravity, double health, Rectangle bounds) {
       
       super(x, y, width, height, dx, bounds);
       this.jumpStart = jumpStart;
@@ -22,6 +23,7 @@ public class Player extends Tangible {
       left = right = jumping = false;
       falling = true;
       isFiring = false;
+      this.health = health;
       
       ammo = new ArrayList<Bullet>();
       
@@ -76,6 +78,8 @@ public class Player extends Tangible {
             ammo.remove(i);
          }
       }
+      
+      if (health < 0) health = 0;
       
    }
    
@@ -181,6 +185,22 @@ public class Player extends Tangible {
    @Override
    public Shape getSelfBounds() {
       return new Rectangle((int) x, (int) y, (int) width, (int) height);
+   }
+
+   public boolean isFiring() {
+      return isFiring;
+   }
+	
+   public void setFiring(boolean isFiring) {
+      this.isFiring = isFiring;
+   }
+	
+   public double getHealth() {
+      return health;
+   }
+	
+   public void setHealth(double health) {
+      this.health = health;
    }
 
 }
