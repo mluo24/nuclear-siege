@@ -85,7 +85,7 @@ public class Player extends Tangible {
    
    public void fire() {
       isFiring = true;
-      ammo.add(new Bullet(x, y, 20, 20, 50, bounds));
+      ammo.add(new Bullet(x + width / 2, y + height / 2 - 10, 20, 20, 50, bounds));
       if (facingLeft) {
          ammo.get(ammo.size() - 1).dx = -50;
       }

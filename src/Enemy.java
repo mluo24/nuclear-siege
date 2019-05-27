@@ -9,9 +9,9 @@ public class Enemy extends Tangible {
    
    private double health;
 
-   public Enemy(double x, double y, double width, double height, double dx, Rectangle bounds) {
+   public Enemy(double x, double y, double width, double height, double dx, Rectangle bounds, double health) {
       super(x, y, width, height, dx, bounds);
-      
+      this.health = health;
    }
 
    @Override
@@ -31,11 +31,26 @@ public class Enemy extends Tangible {
       if (core.getSelfBounds().intersects((Rectangle2D) this.getSelfBounds()) && core.getHealth() > 0) {
          core.setHealth(core.getHealth() - 0.25);
       }
+      for (int i = 0; i < player.getAmmo().size(); i++) {
+         Bullet b = player.getAmmo().get(i);
+         if (b.getSelfBounds().intersects((Rectangle2D)this.getSelfBounds())) {
+            health = 0;
+            player.getAmmo().remove(i);
+         }
+      }
    }
 
    @Override
    public Shape getSelfBounds() {
       return new Rectangle((int) x, (int) y, (int) width, (int) height);
+   }
+
+   public double getHealth() {
+      return health;
+   }
+
+   public void setHealth(double health) {
+      this.health = health;
    }
 
 }
