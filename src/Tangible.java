@@ -5,16 +5,17 @@ import java.awt.Rectangle;
 public abstract class Tangible implements GamePiece {
    
    protected double x, y, width, height;
-   protected double dx;
+   protected double dx, moveSpeed;
    protected Rectangle bounds;
    
-   public Tangible(double x, double y, double width, double height, double dx, Rectangle bounds) {
+   public Tangible(double x, double y, double width, double height, double moveSpeed, Rectangle bounds) {
       super();
       this.x = x;
       this.y = y;
       this.width = width;
       this.height = height;
-      this.dx = dx;
+      this.moveSpeed = moveSpeed;
+      this.dx = moveSpeed;
       this.bounds = bounds;
    }
 
@@ -25,7 +26,8 @@ public abstract class Tangible implements GamePiece {
       this.width = width;
       this.height = height;
       this.bounds = bounds;
-      this.dx = 6;
+      this.moveSpeed = 6;
+      this.dx = moveSpeed;
    }
    
    public boolean isOutOfBounds() {
@@ -70,6 +72,14 @@ public abstract class Tangible implements GamePiece {
 
    public void setDx(double dx) {
       this.dx = dx;
+   }
+   
+   public double getMoveSpeed() {
+      return dx;
+   }
+
+   public void setMoveSpeed(double moveSpeed) {
+      this.moveSpeed = moveSpeed;
    }
 
    public Rectangle getBounds() {

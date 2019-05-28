@@ -6,7 +6,7 @@ import java.awt.geom.Ellipse2D;
 //May 21, 2019
 
 public class Bullet extends Tangible {
-
+   
    public Bullet(double x, double y, double width, double height, double dx, Rectangle bounds) {
       super(x, y, width, height, dx, bounds);
    }

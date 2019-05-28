@@ -7,13 +7,13 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
-//I stole this from your website
+// I stole this from your website
 public class GamePanel extends JPanel implements MouseListener, MouseMotionListener, ActionListener, KeyListener {
    
    private static final long serialVersionUID = 1L;
    
    // constants
-   private static final int PREF_W = 800;
+   private static final int PREF_W = 1000;
    private static final int PREF_H = 600;
    
    // panel utilities
@@ -29,6 +29,7 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
    private ArrayList<Obstacle> obstacles;
    private int score;
    private CountTimer scoreKeeper;
+   private CountTimer enemyTimer;
    
    /**
     * Constructs a new GamePanel
@@ -41,13 +42,15 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
       player = new Player(PREF_W / 2 - 50, PREF_H / 2 - 50, 100, 100, 10, -35, 1.75, 100, new Rectangle(PREF_W, PREF_H));
       core = new Core(PREF_W / 2 - 50, PREF_H - 150, 100, 150, 0, new Rectangle(PREF_W, PREF_H), 200);
       enemies = new ArrayList<Enemy>();
-      for (int i = 0; i < 10; i++) {
-         enemies.add(new Enemy((Math.random() * (PREF_W - 50)), PREF_H - 140, 50, 140, 2, new Rectangle(PREF_W, PREF_H), 10));
+      for (int i = 0; i < 3; i++) {
+         addEnemy();
       }
       obstacles = new ArrayList<Obstacle>();
       score = 0;
       scoreKeeper = new CountTimer();
-      scoreKeeper.setDelay(100);
+      scoreKeeper.setDelay(50);
+      enemyTimer = new CountTimer();
+      enemyTimer.setDelay(1500);
             
       this.setFocusable(true);
       this.addKeyListener(this);
@@ -67,6 +70,7 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
       g2.setRenderingHints(hints);
       g2.setFont(font);
       g2.setColor(Color.RED);
+      
       //PAINT TO THE PANEL HERE
       g2.drawString("Score: " + score, 0, 100);
       g2.drawString("Core health: " + core.getHealth(), 280, 300);
@@ -83,20 +87,30 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
       for (Enemy enemy : enemies) {
          enemy.drawPiece(g2);
       }
+      
+      if (isGameOver()) {
+         super.paintComponent(g); 
+         g2.drawString("Game Over!", PREF_W / 2 - 100, PREF_H / 2 - 20);
+         g2.drawString("Final Score: " + score, PREF_W / 2 - 100, PREF_H / 2 + 20);
+      }
 
    }
    
    private void update() {
-      for (int i = 0; i < enemies.size(); i++) {
-         enemies.get(i).update();
-         enemies.get(i).interactUpdate(player, core);
-         if (enemies.get(i).getHealth() <= 0) {
-            enemies.remove(i);
+      if (!isGameOver()) {
+         scoreKeeper.update();
+         enemyTimer.update();
+         for (int i = 0; i < enemies.size(); i++) {
+            enemies.get(i).update();
+            enemies.get(i).interactUpdate(player, core);
+            if (enemies.get(i).getHealth() <= 0) {
+               enemies.remove(i);
+            }
          }
+         if (enemyTimer.getElapsed() % 2 == 0) System.out.println("hello");
+         score = (int) scoreKeeper.getElapsed();
+         player.update();
       }
-      scoreKeeper.update();
-      score = (int) scoreKeeper.getElapsed();
-      player.update();
       repaint();
    }
    
@@ -106,6 +120,13 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
    
    private void reset() {
       
+   }
+   
+   private void addEnemy() {
+      int assign = ( (int) (Math.random() * 2) ) == 0 ? 0 - ((int) (Math.random() * 10) + 50) : PREF_W + (int) (Math.random() * 10);
+      enemies.add(new Enemy(assign, PREF_H - 140, 50, 140, (Math.random() * 2) + 1, new Rectangle(PREF_W, PREF_H), 10));
+      Enemy latest = enemies.get(enemies.size() - 1);
+      if (latest.getX() >= PREF_W) latest.setDx(-latest.getMoveSpeed());
    }
    
    @Override

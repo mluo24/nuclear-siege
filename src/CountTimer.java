@@ -3,34 +3,43 @@
 
 public class CountTimer {
    
-   private long startTime;
-   private long delay;
+   protected long startTime;
+   protected long delay;
+   protected long elapsedTime;
    
-   private long timeElapsed;
+   protected long count;
    
    public CountTimer() {
       startTime = System.currentTimeMillis();
-      timeElapsed = 0;
+      count = 0;
    }
    
    public void setDelay(long d) {
       delay = d;
    }
    
+   public long getDelay() {
+      return delay;
+   }
+   
    public void update() {
       
       if(delay == -1) return;
       
-      long elapsedTime = System.currentTimeMillis() - startTime;
+      elapsedTime = System.currentTimeMillis() - startTime;
       if (elapsedTime > delay) {
-         timeElapsed++;
-         this.start();
+         count++;
+         this.reset();
       }
             
    }
    
+   public long getTimeElapsed() {
+      return elapsedTime;
+   }
+   
    public long getElapsed() {
-      return timeElapsed;
+      return count;
    }
    
    public void start() {
