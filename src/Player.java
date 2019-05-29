@@ -11,7 +11,7 @@ public class Player extends Tangible {
    private double dy, jumpStart, gravity;
    private boolean left, right, jumping, falling;
    private boolean facingLeft, facingRight;
-   private boolean isFiring;
+   private boolean isFiring, isHit, isInvincible;
    private double health;
    private ArrayList<Bullet> ammo;
    
@@ -22,7 +22,7 @@ public class Player extends Tangible {
       this.gravity = gravity;
       left = right = jumping = false;
       falling = true;
-      isFiring = false;
+      isHit  = isFiring = isInvincible = false;
       this.health = health;
       
       ammo = new ArrayList<Bullet>();
@@ -195,6 +195,22 @@ public class Player extends Tangible {
       this.isFiring = isFiring;
    }
 	
+   public boolean isHit() {
+      return isHit;
+   }
+
+   public void setHit(boolean isHit) {
+      this.isHit = isHit;
+   }
+
+   public boolean isInvincible() {
+      return isInvincible;
+   }
+
+   public void setInvincible(boolean isInvincible) {
+      this.isInvincible = isInvincible;
+   }
+
    public double getHealth() {
       return health;
    }

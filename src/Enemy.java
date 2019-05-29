@@ -25,11 +25,13 @@ public class Enemy extends Tangible {
    }
    
    public void interactUpdate(Player player, Core core) {
-      if (player.getSelfBounds().intersects((Rectangle2D) this.getSelfBounds()) && player.getHealth() > 0) {
-         player.setHealth(player.getHealth() - 5);
+      if (player.getSelfBounds().intersects((Rectangle2D) this.getSelfBounds()) && player.getHealth() > 0 && !player.isInvincible()) {
+//         player.setHealth(player.getHealth() - 5);
+         player.setHit(true);
+//         System.out.println("Hit? " + player.isHit());
       }
       if (core.getSelfBounds().intersects((Rectangle2D) this.getSelfBounds()) && core.getHealth() > 0) {
-         core.setHealth(core.getHealth() - 1);
+//         core.setHealth(core.getHealth() - 1);
          dx = 0;
       }
       for (int i = 0; i < player.getAmmo().size(); i++) {

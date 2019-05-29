@@ -32,7 +32,7 @@ public class CountTimer {
       if (elapsedTime > delay) {
          count++;
          isChanged = true;
-         this.reset();
+         this.start();
       }
             
    }
@@ -54,6 +54,7 @@ public class CountTimer {
    }
    
    public void reset() {
+      elapsedTime = 0;
       startTime = System.currentTimeMillis();
    }
 

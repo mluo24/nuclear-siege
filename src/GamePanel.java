@@ -30,6 +30,7 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
    private int score;
    private CountTimer scoreKeeper;
    private CountTimer enemyTimer;
+   private CountTimer invincibility;
    
    /**
     * Constructs a new GamePanel
@@ -51,6 +52,8 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
       scoreKeeper.setDelay(50);
       enemyTimer = new CountTimer();
       enemyTimer.setDelay(500);
+      invincibility = new CountTimer();
+      invincibility.setDelay(1000);
             
       this.setFocusable(true);
       this.addKeyListener(this);
@@ -113,6 +116,24 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
                addEnemy();
                count++;
             }
+         }
+         if (player.isHit()) {
+            
+            count = 0;
+            if (!player.isInvincible()) {
+               player.setHealth(player.getHealth() - 5);
+               System.out.println("lowering health");
+            }
+            
+            player.setInvincible(true);
+                                    
+            player.setHit(false);
+            
+         }
+         if (player.isInvincible()) {
+            invincibility.update();
+            if (invincibility.isChanged())
+               player.setInvincible(false);
          }
          score = (int) scoreKeeper.getElapsed();
          player.update();
