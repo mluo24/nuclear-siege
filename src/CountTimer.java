@@ -6,7 +6,7 @@ public class CountTimer {
    protected long startTime;
    protected long delay;
    protected long elapsedTime;
-   
+   protected boolean isChanged;
    protected long count;
    
    public CountTimer() {
@@ -26,9 +26,12 @@ public class CountTimer {
       
       if(delay == -1) return;
       
+      isChanged = false;
+      
       elapsedTime = System.currentTimeMillis() - startTime;
       if (elapsedTime > delay) {
          count++;
+         isChanged = true;
          this.reset();
       }
             
@@ -40,6 +43,10 @@ public class CountTimer {
    
    public long getElapsed() {
       return count;
+   }
+   
+   public boolean isChanged() {
+      return isChanged;
    }
    
    public void start() {

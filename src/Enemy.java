@@ -26,10 +26,11 @@ public class Enemy extends Tangible {
    
    public void interactUpdate(Player player, Core core) {
       if (player.getSelfBounds().intersects((Rectangle2D) this.getSelfBounds()) && player.getHealth() > 0) {
-         player.setHealth(player.getHealth() - 0.25);
+         player.setHealth(player.getHealth() - 5);
       }
       if (core.getSelfBounds().intersects((Rectangle2D) this.getSelfBounds()) && core.getHealth() > 0) {
-         core.setHealth(core.getHealth() - 0.25);
+         core.setHealth(core.getHealth() - 1);
+         dx = 0;
       }
       for (int i = 0; i < player.getAmmo().size(); i++) {
          Bullet b = player.getAmmo().get(i);

@@ -39,8 +39,8 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
       timer = new Timer(10, this);
       timer.start();
       
-      player = new Player(PREF_W / 2 - 50, PREF_H / 2 - 50, 100, 100, 10, -35, 1.75, 100, new Rectangle(PREF_W, PREF_H));
-      core = new Core(PREF_W / 2 - 50, PREF_H - 150, 100, 150, 0, new Rectangle(PREF_W, PREF_H), 200);
+      player = new Player(PREF_W / 2 - 50, PREF_H / 2 - 50, 100, 100, 10, -35, 1.75, 50, new Rectangle(PREF_W, PREF_H));
+      core = new Core(PREF_W / 2 - 50, PREF_H - 150, 100, 150, 0, new Rectangle(PREF_W, PREF_H), 100);
       enemies = new ArrayList<Enemy>();
       for (int i = 0; i < 3; i++) {
          addEnemy();
@@ -50,7 +50,7 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
       scoreKeeper = new CountTimer();
       scoreKeeper.setDelay(50);
       enemyTimer = new CountTimer();
-      enemyTimer.setDelay(1500);
+      enemyTimer.setDelay(500);
             
       this.setFocusable(true);
       this.addKeyListener(this);
@@ -58,7 +58,7 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
       this.addMouseListener(this);
       this.addMouseMotionListener(this);
       
-      reset();
+//      reset();
       
    }
 
@@ -107,7 +107,13 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
                enemies.remove(i);
             }
          }
-         if (enemyTimer.getElapsed() % 2 == 0) System.out.println("hello");
+         int count = 0;
+         if (enemyTimer.isChanged()) {
+            while (count < 2) {
+               addEnemy();
+               count++;
+            }
+         }
          score = (int) scoreKeeper.getElapsed();
          player.update();
       }
@@ -124,9 +130,17 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
    
    private void addEnemy() {
       int assign = ( (int) (Math.random() * 2) ) == 0 ? 0 - ((int) (Math.random() * 10) + 50) : PREF_W + (int) (Math.random() * 10);
-      enemies.add(new Enemy(assign, PREF_H - 140, 50, 140, (Math.random() * 2) + 1, new Rectangle(PREF_W, PREF_H), 10));
+      enemies.add(new Enemy(assign, PREF_H - 140, 50, 140, (Math.random() * 3) + 2, new Rectangle(PREF_W, PREF_H), 10));
       Enemy latest = enemies.get(enemies.size() - 1);
       if (latest.getX() >= PREF_W) latest.setDx(-latest.getMoveSpeed());
+   }
+   
+   public void saveHighScore() {
+      
+   }
+   
+   public void getHighScore() {
+      
    }
    
    @Override
