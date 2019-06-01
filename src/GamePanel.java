@@ -15,6 +15,7 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
    // constants
    private static final int PREF_W = 1000;
    private static final int PREF_H = 600;
+   private static final int GROUND = PREF_H - 90;
    
    // panel utilities
    private RenderingHints hints = new RenderingHints(
@@ -40,10 +41,10 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
       timer = new Timer(10, this);
       timer.start();
       
-      player = new Player(PREF_W / 2 - 50, PREF_H / 2 - 50, 100, 100, 10, -35, 1.75, 50, new Rectangle(PREF_W, PREF_H));
-      core = new Core(PREF_W / 2 - 50, PREF_H - 150, 100, 150, 0, new Rectangle(PREF_W, PREF_H), 100);
+      player = new Player(PREF_W / 2 - 50, GROUND / 2 - 50, 100, 100, 10, -35, 1.75, 50, new Rectangle(PREF_W, GROUND));
+      core = new Core(PREF_W / 2 - 50, GROUND - 150, 100, 150, 0, new Rectangle(PREF_W, GROUND), 100);
       enemies = new ArrayList<Enemy>();
-      for (int i = 0; i < 3; i++) {
+      for (int i = 0; i < 1; i++) {
          addEnemy();
       }
       obstacles = new ArrayList<Obstacle>();
@@ -93,8 +94,8 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
       
       if (isGameOver()) {
          super.paintComponent(g); 
-         g2.drawString("Game Over!", PREF_W / 2 - 100, PREF_H / 2 - 20);
-         g2.drawString("Final Score: " + score, PREF_W / 2 - 100, PREF_H / 2 + 20);
+         g2.drawString("Game Over!", PREF_W / 2 - 100, GROUND / 2 - 20);
+         g2.drawString("Final Score: " + score, PREF_W / 2 - 100, GROUND / 2 + 20);
       }
 
    }
@@ -110,28 +111,28 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
                enemies.remove(i);
             }
          }
-         int count = 0;
-         if (enemyTimer.isChanged()) {
-            while (count < 2) {
-               addEnemy();
-               count++;
-            }
-         }
-         if (player.isHit()) {
-            
-            count = 0;
-            if (!player.isInvincible()) {
-               player.setHealth(player.getHealth() - 5);
-               System.out.println("lowering health");
-            }
+//         int count = 0;
+//         if (enemyTimer.isChanged()) {
+//            while (count < 2) {
+//               addEnemy();
+//               count++;
+//            }
+//         }
+         if (player.isHit() && !player.isInvincible()) { //&& !player.isInvincible()
             
             player.setInvincible(true);
-                                    
-            player.setHit(false);
+             //(!player.isInvincible()) {
+               player.setHealth(player.getHealth() - 5);
+//               System.out.println("hello");
+//               System.out.println("lowering health");
+               
             
          }
          if (player.isInvincible()) {
+            System.out.println(player.isHit());
             invincibility.update();
+//            player.setHit(false);
+//            System.out.println("updating");
             if (invincibility.isChanged())
                player.setInvincible(false);
          }
@@ -151,9 +152,9 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
    
    private void addEnemy() {
       int assign = ( (int) (Math.random() * 2) ) == 0 ? 0 - ((int) (Math.random() * 10) + 50) : PREF_W + (int) (Math.random() * 10);
-      enemies.add(new Enemy(assign, PREF_H - 140, 50, 140, (Math.random() * 3) + 2, new Rectangle(PREF_W, PREF_H), 10));
+      enemies.add(new Enemy(assign, GROUND - 140, 50, 140, (Math.random() * 3) + 2, new Rectangle(PREF_W, GROUND), 10));
       Enemy latest = enemies.get(enemies.size() - 1);
-      if (latest.getX() >= PREF_W) latest.setDx(-latest.getMoveSpeed());
+      if (latest.getX() >= GROUND) latest.setDx(-latest.getMoveSpeed());
    }
    
    public void saveHighScore() {
@@ -211,7 +212,9 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 
    @Override
    public void mousePressed(MouseEvent e) {
-      System.out.println("PRESSING");
+//      System.out.println("PRESSING");
+      System.out.println("I: " + player.isInvincible());
+      System.out.println("H: " + player.isHit());
    }
 
    @Override
@@ -222,7 +225,7 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
    @Override
    public void mouseDragged(MouseEvent e)
    {
-      System.out.println("DRAGGING");
+//      System.out.println("DRAGGING");
    }
 
    @Override

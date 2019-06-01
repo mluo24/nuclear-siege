@@ -30,6 +30,9 @@ public class Enemy extends Tangible {
          player.setHit(true);
 //         System.out.println("Hit? " + player.isHit());
       }
+      else {
+         player.setHit(false);
+      }
       if (core.getSelfBounds().intersects((Rectangle2D) this.getSelfBounds()) && core.getHealth() > 0) {
 //         core.setHealth(core.getHealth() - 1);
          dx = 0;
