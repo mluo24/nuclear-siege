@@ -1,25 +1,37 @@
 // By Miranda Luo
 // Created on May 27, 2019
 
-public class TestClass {
+import java.awt.Component;
+import java.awt.Dimension;
+//w ww  .j  a v  a 2s  .c  o m
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
 
-   public static void main(String[] args) throws InterruptedException {
-      
-      long startTime = System.currentTimeMillis();
-      
-      
-      while (true) {
-         
-         long elapsedTime = System.currentTimeMillis() - startTime;
-         long elapsedSeconds = elapsedTime / 1000;
-         long secondsDisplay = elapsedSeconds % 60;
-         long elapsedMinutes = elapsedSeconds / 60;
-         //put here code to format and display the values
-         
-         long timeTillNextDisplayChange = 1000 - (elapsedTime % 1000);
-         
-      }
+public class TestClass
+{
+  public static void main(String[] args) {
+    JFrame frame = new JFrame();
+    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    frame.getContentPane().setLayout(
+        new BoxLayout(frame.getContentPane(), BoxLayout.Y_AXIS));
 
-   }
-
+    JPanel a = new JPanel();
+    a.setAlignmentX(Component.CENTER_ALIGNMENT);
+    a.setPreferredSize(new Dimension(100, 100));
+    a.setMaximumSize(new Dimension(100, 100)); // set max = pref
+    a.setBorder(BorderFactory.createTitledBorder("aa"));
+    JPanel b = new JPanel();
+    b.setAlignmentX(Component.CENTER_ALIGNMENT);
+    b.setPreferredSize(new Dimension(50, 50));
+    b.setMaximumSize(new Dimension(50, 50)); // set max = pref
+    b.setBorder(BorderFactory.createTitledBorder("bb"));
+    
+    frame.setPreferredSize(new Dimension (800, 600));
+    frame.getContentPane().add(a);
+    frame.getContentPane().add(b);
+    frame.pack();
+    frame.setVisible(true);
+  }
 }
