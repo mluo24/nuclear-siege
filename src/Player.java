@@ -60,6 +60,17 @@ public class Player extends Tangible {
          x += dx;
       }
       
+      if (isOutOfBoundsX()) {
+         if (left) {
+            left = false;
+            x = 0;
+         }
+         else if (right) {
+            right = false;
+            x = bounds.getWidth() - width;
+         }
+      }
+      
       if (isOutOfBounds()) {
          falling = false;
          returnY();
@@ -100,6 +111,10 @@ public class Player extends Tangible {
    
    public boolean isOutOfBounds() {
       return y + height > bounds.getHeight();
+   }
+   
+   public boolean isOutOfBoundsX() {
+      return x < 0 || x + width > bounds.getWidth();
    }
 
    public double getDy() {

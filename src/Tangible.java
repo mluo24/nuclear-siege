@@ -6,6 +6,7 @@ public abstract class Tangible implements GamePiece {
    
    protected double x, y, width, height;
    protected double dx, moveSpeed;
+   // protected BufferedImage sprites[]
    protected Rectangle bounds;
    
    public Tangible(double x, double y, double width, double height, double moveSpeed, Rectangle bounds) {

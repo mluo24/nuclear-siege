@@ -7,6 +7,9 @@ import java.awt.geom.Rectangle2D;
 
 public class Enemy extends Tangible {
    
+   private double dy, jumpStart, gravity;
+   private boolean jumping, falling;
+   private boolean facingLeft, facingRight;
    private double health;
 
    public Enemy(double x, double y, double width, double height, double dx, Rectangle bounds, double health) {
@@ -42,7 +45,7 @@ public class Enemy extends Tangible {
 ////         System.out.println("Hit? " + player.isHit());
 //      }
       if (core.getSelfBounds().intersects((Rectangle2D) this.getSelfBounds()) && core.getHealth() > 0) {
-         core.setHealth(core.getHealth() - 0.25);
+//         core.setHealth(core.getHealth() - 0.25);
          dx = 0;
       }
       for (int i = 0; i < player.getAmmo().size(); i++) {
