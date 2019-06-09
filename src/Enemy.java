@@ -3,6 +3,8 @@ import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.Rectangle2D;
 
+import javax.swing.JPanel;
+
 //May 21, 2019
 
 public class Enemy extends Tangible {
@@ -18,7 +20,7 @@ public class Enemy extends Tangible {
    }
 
    @Override
-   public void drawPiece(Graphics2D g2) {
+   public void drawPiece(Graphics2D g2, JPanel panel) {
       g2.fillRect((int) x, (int) y, (int) width, (int) height);
    }
 

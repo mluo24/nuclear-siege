@@ -1,6 +1,7 @@
 // By Miranda Luo
 // Created on May 27, 2019
 
+//derived from the animation class
 public class CountTimer {
    
    protected long startTime;
@@ -23,9 +24,7 @@ public class CountTimer {
    }
    
    public void update() {
-      
-      if(delay == -1) return;
-      
+            
       isChanged = false;
       
       elapsedTime = System.currentTimeMillis() - startTime;

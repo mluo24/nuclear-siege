@@ -1,7 +1,14 @@
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+
+import javax.imageio.ImageIO;
+import javax.swing.JPanel;
 
 //Miranda Luo
 //May 20, 2019
@@ -11,9 +18,13 @@ public class Player extends Tangible {
    private double dy, jumpStart, gravity;
    private boolean left, right, jumping, falling;
    private boolean facingLeft, facingRight;
-   private boolean isFiring, isHit, isInvincible;
+   private boolean isFiring, isHit, isInvincible, isOnPlatform;
    private double health;
    private ArrayList<Bullet> ammo;
+   
+   private BufferedImage[] idleSprites, jumpingSprites, movingSprites, helmetIdleSprites, helmetMovingSprites;
+   private BufferedImage gunSprite;
+   private Animation animation, helmetAnimation;
    
    public Player(double x, double y, double width, double height, double dx, double jumpStart, double gravity, double health, Rectangle bounds) {
       
@@ -22,30 +33,91 @@ public class Player extends Tangible {
       this.gravity = gravity;
       left = right = jumping = false;
       falling = true;
-      isHit  = isFiring = isInvincible = false;
+      facingLeft = true;
+      isHit  = isFiring = isInvincible = isOnPlatform = false;
       this.health = health;
       
       ammo = new ArrayList<Bullet>();
       
+      BufferedImage sprites, helmetSprites;
+            
+      idleSprites = new BufferedImage[1];
+      jumpingSprites = new BufferedImage[1];
+      movingSprites = new BufferedImage[4];
+      helmetIdleSprites = new BufferedImage[1];
+      helmetMovingSprites = new BufferedImage[1];
+      
+      try {                
+         gunSprite = ImageIO.read(new File("src/resources/weapon.png"));
+         sprites = ImageIO.read(new File("src/resources/player_set.png"));
+         helmetSprites = ImageIO.read(new File("src/resources/head_armor_set.png"));
+      } catch (IOException ex) {
+         System.out.println("hello");
+         ex.printStackTrace();
+         sprites = helmetSprites = gunSprite = null;
+      }
+            
+      for (int i = 0; i < 1; i++) {
+         idleSprites[i] = sprites.getSubimage(2, 1, 13, 16);
+      }
+      
+      for (int i = 0; i < 1; i++) {
+         jumpingSprites[i] = sprites.getSubimage(18, 1, 13, 16);
+      }
+      
+      for (int i = 0; i < movingSprites.length; i++) {
+         movingSprites[i] = sprites.getSubimage(13 * i + 3 * i + 2, 18, 13, 16);
+      }
+      
+      for (int i = 0; i < helmetIdleSprites.length; i++) {
+         helmetIdleSprites[i] = helmetSprites.getSubimage(4, 36, 10, 9);
+      }
+      
+      for (int i = 0; i < helmetMovingSprites.length; i++) {
+         helmetMovingSprites[i] = helmetSprites.getSubimage(11, 36, 10, 9);
+      }
+            
+            
+      animation = new Animation();
+      animation.setFrames(idleSprites);
+      animation.setDelay(-1);
+      
+      helmetAnimation = new Animation();
+      helmetAnimation.setFrames(helmetIdleSprites);
+      helmetAnimation.setDelay(-1);
+      
    }
 
-   public void drawPiece(Graphics2D g2) {
-      g2.fillRect((int) x, (int) y, (int) width, (int) height);
+   public void drawPiece(Graphics2D g2, JPanel panel) {
+//      g2.fillRect((int) x, (int) y, (int) width, (int) height);
       if (isFiring) {
          for (Bullet b : ammo) 
-            b.drawPiece(g2);
+            b.drawPiece(g2, panel);
       }
+      int drawWidth = (int) (facingRight ? width : -width);
+      int drawX = (int) (drawWidth < 0 ? x + width : x);
+      g2.drawImage(animation.getImage(), drawX, (int) y, drawWidth, (int) height, panel);
+      g2.drawImage(helmetAnimation.getImage(), drawX + 1, (int) y, drawWidth - 3, 9, panel);
+      g2.drawImage(gunSprite, drawX + 10, (int) y + 21, (int) (gunSprite.getWidth() * (this.getWidth() / 13.0) / 1.2), (int) ( (this.getHeight() / 16.0) * gunSprite.getHeight() / 1.5 ), panel);
    }
    
    public void update() {
       
+      animation.update();
+      helmetAnimation.update();
+      
+      
       // I stole this from your website
       if (jumping) {
+         animation.setFrames(jumpingSprites);
+         animation.setDelay(-1);
          dy = jumpStart;
          falling = true;
          jumping = false;
       }
       else if (falling) {
+         animation.setFrames(jumpingSprites);
+         animation.setDelay(-1);
          dy += gravity;
       }
       else {
@@ -54,13 +126,24 @@ public class Player extends Tangible {
       y += dy;
       
       if (left) {
+         animation.setFrames(movingSprites);
+         animation.setDelay(100);
          x -= dx;
       }
       if (right) {
+         animation.setFrames(movingSprites);
+         animation.setDelay(100);
          x += dx;
       }
       
+      if (!left && !right && dy == 0) {
+         animation.setFrames(idleSprites);
+         animation.setDelay(-1);
+      }
+      
       if (isOutOfBoundsX()) {
+         animation.setFrames(idleSprites);
+         animation.setDelay(-1);
          if (left) {
             left = false;
             x = 0;
@@ -75,6 +158,9 @@ public class Player extends Tangible {
          falling = false;
          returnY();
       }
+//      if (isOnPlatform) {
+//         falling = false;
+//      }
       if (ammo.isEmpty()) {
          isFiring = false;
       }
@@ -96,7 +182,7 @@ public class Player extends Tangible {
    
    public void fire() {
       isFiring = true;
-      ammo.add(new Bullet(x + width / 2 - 10, y + height / 2 - 10, 20, 20, 35, bounds));
+      ammo.add(new Bullet(x + width / 2 - 14, y + height / 2 - 5, 28, 10, 35, bounds));
       if (facingLeft) {
          ammo.get(ammo.size() - 1).dx = -ammo.get(ammo.size() - 1).moveSpeed;
       }
@@ -232,6 +318,70 @@ public class Player extends Tangible {
 	
    public void setHealth(double health) {
       this.health = health;
+   }
+
+   public BufferedImage[] getIdleSprites() {
+      return idleSprites;
+   }
+
+   public void setIdleSprites(BufferedImage[] idleSprites) {
+      this.idleSprites = idleSprites;
+   }
+
+   public BufferedImage[] getJumpingSprites() {
+      return jumpingSprites;
+   }
+
+   public void setJumpingSprites(BufferedImage[] jumpingSprites) {
+      this.jumpingSprites = jumpingSprites;
+   }
+
+   public BufferedImage[] getMovingSprites() {
+      return movingSprites;
+   }
+
+   public void setMovingSprites(BufferedImage[] movingSprites) {
+      this.movingSprites = movingSprites;
+   }
+
+   public boolean isOnPlatform() {
+      return isOnPlatform;
+   }
+
+   public void setOnPlatform(boolean isOnPlatform) {
+      this.isOnPlatform = isOnPlatform;
+   }
+
+   public BufferedImage[] getHelmetIdleSprites() {
+      return helmetIdleSprites;
+   }
+
+   public void setHelmetIdleSprites(BufferedImage[] helmetIdleSprites) {
+      this.helmetIdleSprites = helmetIdleSprites;
+   }
+
+   public BufferedImage[] getHelmetMovingSprites() {
+      return helmetMovingSprites;
+   }
+
+   public void setHelmetMovingSprites(BufferedImage[] helmetMovingSprites) {
+      this.helmetMovingSprites = helmetMovingSprites;
+   }
+
+   public BufferedImage getGunSprite() {
+      return gunSprite;
+   }
+
+   public void setGunSprite(BufferedImage gunSprite) {
+      this.gunSprite = gunSprite;
+   }
+
+   public Animation getHelmetAnimation() {
+      return helmetAnimation;
+   }
+
+   public void setHelmetAnimation(Animation helmetAnimation) {
+      this.helmetAnimation = helmetAnimation;
    }
 
 }

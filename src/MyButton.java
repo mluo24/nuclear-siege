@@ -1,5 +1,6 @@
-import java.awt.Graphics2D;
-import java.awt.Shape;
+import java.awt.*;
+
+import javax.swing.JPanel;
 
 //Jun 7, 2019
 
@@ -58,17 +59,28 @@ public class MyButton implements GamePiece {
    }
 
    @Override
-   public void drawPiece(Graphics2D g2) {
-      g2.drawString(message, x, y);
+   public void drawPiece(Graphics2D g2, JPanel panel) {
+      FontMetrics fm = g2.getFontMetrics();
+      int msgY = y + fm.getHeight() - fm.getLeading();
+      int msgX = fm.stringWidth(message) >= width ? x : x + (width / 2 - fm.stringWidth(message) / 2) ;
+      g2.setColor(Color.LIGHT_GRAY);
+      g2.fill(getSelfBounds());
+      g2.setColor(Color.BLACK);
+      g2.drawString(message, msgX, msgY);
    }
 
    @Override
    public Shape getSelfBounds() {
-      return null;
+      return new Rectangle(x, y, width, height);
    }
 
    @Override
    public void update() {
+   }
+
+   @Override
+   public String toString() {
+      return "MyButton [x=" + x + ", y=" + y + ", width=" + width + ", height=" + height + ", message=" + message + "]";
    }
 
 }

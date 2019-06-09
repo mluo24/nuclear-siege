@@ -1,13 +1,19 @@
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-import javax.swing.*;
+import javax.imageio.ImageIO;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
+import javax.swing.Timer;
 
 // I stole this from your website
+// Main game runner
 public class GamePanel extends JPanel implements MouseListener, MouseMotionListener, ActionListener, KeyListener {
    
    private static final long serialVersionUID = 1L;
@@ -15,25 +21,32 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
    // constants
    private static final int PREF_W = 1200;
    private static final int PREF_H = 600;
-   private static final int GROUND = PREF_H - 90;
+   private static final int GROUND = PREF_H - 110;
+   private static final int TITLE_SCREEN = 0;
+   private static final int PLAYING = 1;
+   private static final int PAUSED = 2;
    
    // panel utilities
 //   private RenderingHints hints = new RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-   private Font font = new Font("ArcadeClassic", Font.PLAIN, 40);
+   private Font font = new Font("m5x7", Font.PLAIN, 40);
    private Font countdownFont = new Font("Verdana", Font.PLAIN, 250);
    private String highScoreFile = "src/highscore.txt";
-   private MyButton[] utilities = {new MyButton(10, 10, 100, 50, "Play"), 
-         new MyButton(10, 100, 100, 50, highScoreFile)};
-   private JButton restart = new JButton("Reset");
+   private MyButton[] utilities = {new MyButton(PREF_W / 2 - 50, PREF_H / 2 + 10, 100, 50, "Play"), 
+         new MyButton(PREF_W / 2 - 100, PREF_H / 2 + 100, 200, 50, "How to Play"),
+         new MyButton(PREF_W / 2 - 50, PREF_H / 2 + 190, 100, 50, "Exit")};
+   private MyButton[] ending = {new MyButton(PREF_W / 2 - 50, PREF_H / 2 + 10, 100, 50, "Restart"), 
+         new MyButton(PREF_W / 2 - 50, PREF_H / 2 + 100, 100, 50, "Title")};;
+   private BufferedImage titleBg, background;
    
    // game elements
-   private int gameState = 0;
+   private int gameState = TITLE_SCREEN;
    private Timer timer;
    private Player player;
    private Core core;
    private ArrayList<Enemy> enemies;
    private Platform[] platforms = 
-      {new Platform(0, PREF_H / 2, PREF_W / 2 - 250, 20), new Platform(PREF_W - (PREF_W / 2 - 250), PREF_H / 2, PREF_W / 2 - 250, 20)};
+      {new Platform(0, PREF_H / 2, PREF_W / 2 - 250, 20), 
+            new Platform(PREF_W - (PREF_W / 2 - 250), PREF_H / 2, PREF_W / 2 - 250, 20)};
    private int score;
    private int highScore;
    private double maxPlayerHealth = 50;
@@ -49,21 +62,12 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
     */
    public GamePanel() {
       
-      //FIX THIS SO YOU MAKE YOUR OWN BUTTONS
-//      this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
-//      this.setAlignmentX(CENTER_ALIGNMENT);
-//      
-//      for (JButton b : utilities) {
-//         b.setFont(font);
-//         b.setPreferredSize(new Dimension(100, 40));
-//         b.setAlignmentX(JButton.CENTER_ALIGNMENT);
-//         b.addActionListener(this);
-//         this.add(b);
-//      }
-      
-      restart.setPreferredSize(new Dimension(100, 40));
-      restart.setAlignmentX(JButton.CENTER_ALIGNMENT);
-      restart.addActionListener(this);
+      try {                
+         titleBg = ImageIO.read(new File("src/resources/bricks.png"));
+         background = ImageIO.read(new File("src/resources/back.png"));
+      } catch (IOException ex) {
+           ex.printStackTrace();
+      }
  
       this.setFocusable(true);
       this.addKeyListener(this);
@@ -82,12 +86,17 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
       Graphics2D g2 = (Graphics2D) g;
 //      g2.setRenderingHints(hints);
       g2.setFont(font);
-      g2.setColor(Color.BLACK);
+      g2.setColor(Color.WHITE);
       
-      if (gameState == 0) {
+      if (gameState == TITLE_SCREEN) {
+         g2.drawImage(titleBg, 0, 0, PREF_W, PREF_H, this);
          for (MyButton b : utilities) {
-            b.drawPiece(g2);
+            b.drawPiece(g2, this);
          }
+//         for (int i = 0; i < player.getMovingSprites().length; i++) {
+//            BufferedImage img = player.getMovingSprites()[i];
+//            g2.drawImage(img, (img.getWidth() * 5 + 20) * i + 50, 10, img.getWidth() * 5, img.getHeight() * 5, this);
+//         }
       }
       
       // font metrics
@@ -100,7 +109,7 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
       
       
       //PAINT TO THE PANEL HERE
-      if (gameState == 0) {
+      if (gameState == TITLE_SCREEN) {
          message = "GAME TITLE";
          msgWidth = fm.stringWidth(message);
          messageX = PREF_W / 2 - msgWidth / 2;
@@ -109,8 +118,9 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
       }
 
       // top UI
-      if (gameState == 1 || gameState == 2) {
+      if (gameState == PLAYING || gameState == PAUSED) {
          super.paintComponent(g);
+         g2.drawImage(background, 0, 0, PREF_W, PREF_H, this);
          message = "High Score: " + highScore;
          msgWidth = fm.stringWidth(message);
          g2.drawString("Score: " + score, 10, 40);
@@ -120,44 +130,51 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
          
          
          // draw ground
-         g2.setColor(Color.BLACK);
-         g2.fillRect(0, GROUND, PREF_W, PREF_H - GROUND);
+//         g2.setColor(Color.BLACK);
+//         g2.fillRect(0, GROUND, PREF_W, PREF_H - GROUND);
          
          // draw platforms
          for (Platform p : platforms) {
-            p.drawPiece(g2);
+            p.drawPiece(g2, this);
          }
          
          // draw core
          g2.setColor(Color.BLUE);
-         core.drawPiece(g2);
+         core.drawPiece(g2, this);
          
          // draw enemies
          g2.setColor(Color.YELLOW);
          for (Enemy enemy : enemies) {
-            enemy.drawPiece(g2);
+            enemy.drawPiece(g2, this);
          }
          
          // draw player
-         if (player.isInvincible()) {
-            g2.setColor(Color.CYAN);
-   //         g2.drawString("poof", (int) player.getX(), (int) player.getY());
-         }
-         else {
-            g2.setColor(Color.GREEN);
-         }
-         player.drawPiece(g2);
+//         if (player.isInvincible()) {
+//            g2.setColor(Color.CYAN);
+//   //         g2.drawString("poof", (int) player.getX(), (int) player.getY());
+//         }
+//         else {
+//            g2.setColor(Color.GREEN);
+//         }
+         player.drawPiece(g2, this);
          
          // draw health bars
-         g2.setColor(Color.RED);
+         g2.setColor(Color.WHITE);
          // player
          g2.drawRect((int) player.getX(), (int) player.getY() - 20, (int) player.getWidth(), 10);
-         g2.fillRect((int) player.getX(), (int) player.getY() - 20, (int) ((player.getHealth() / maxPlayerHealth) * (player.getWidth())) , 10);
-         // core
-         g2.drawRect(10, 90, PREF_W - 20, 20);
-         g2.fillRect(10, 90, (int) ((core.getHealth() / maxCoreHealth) * (PREF_W - 20)) , 20);
          
-         if (gameState == 1 && countdownNum > 0) {
+         g2.setColor(Color.RED);
+         g2.fillRect((int) player.getX(), (int) player.getY() - 20, (int) ((player.getHealth() / maxPlayerHealth) * (player.getWidth())) , 10);
+         g2.setColor(Color.BLACK);
+         g2.fillRect((int) player.getX() + (int) ((player.getHealth() / maxPlayerHealth) * (player.getWidth())), (int) player.getY() - 20, (int) ((player.getWidth()) - ((player.getHealth() / maxPlayerHealth) * (player.getWidth()))) , 10);
+         
+         // core
+         g2.setColor(Color.WHITE);
+         g2.drawRect(10, 90, PREF_W - 20, 15);
+         g2.setColor(Color.RED);
+         g2.fillRect(10, 90, (int) ((core.getHealth() / maxCoreHealth) * (PREF_W - 20)) , 15);
+         
+         if (gameState == PLAYING && countdownNum > 0) {
             g2.setFont(countdownFont);
             FontMetrics cf = g2.getFontMetrics(countdownFont);
             g2.setColor(Color.DARK_GRAY);
@@ -165,7 +182,7 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
             g2.drawString(message, PREF_W / 2 - cf.stringWidth(message) / 2, messageY);
          }
          
-         if (gameState == 2) {
+         if (gameState == PAUSED) {
             g2.setColor(new Color(200, 200, 200, 150));
             g2.fillRect(0, 0, PREF_W, PREF_H);
             g2.setColor(Color.BLACK);
@@ -188,6 +205,10 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
          msgWidth = fm.stringWidth(message);
          messageX = PREF_W / 2 - msgWidth / 2;
          g2.drawString(message, messageX, PREF_H / 2 + 20);
+         
+         for (MyButton b : ending) {
+            b.drawPiece(g2, this);
+         }
       }
 
    }
@@ -239,10 +260,9 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
                }
             }
             for (Platform p : platforms) {
-               if (p.getSelfBounds().intersects((Rectangle2D) player.getSelfBounds())) {
-                  player.setFalling(false);
-               }
+               p.playerUpdate(player);
             }
+//            System.out.println(player.isOnPlatform());
             score = (int) scoreKeeper.getElapsed();
             player.update();
          }
@@ -256,14 +276,11 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
       
    }
    
-   private boolean isGameOver() {
+   private void showInstructions() {
       
-      try {
-         if (score > highScore)
-            saveHighScore();
-      } catch (IOException e) {
-         e.printStackTrace();
-      }
+   }
+   
+   private boolean isGameOver() {
       return player.getHealth() == 0 || core.getHealth() == 0;
       
    }
@@ -272,12 +289,10 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
       
       countdownNum = 3;
       
-      
-      
       timer = new Timer(10, this);
       timer.start();
       
-      player = new Player(PREF_W / 2 - 25, GROUND / 2 - 25, 50, 50, 10, -30, 1.75, maxPlayerHealth, new Rectangle(PREF_W, GROUND));
+      player = new Player(PREF_W / 2 - 25, GROUND / 2 - 25, 52, 64, 4.5, -25, 1.50, maxPlayerHealth, new Rectangle(PREF_W, GROUND));
       core = new Core(PREF_W / 2 - 50, GROUND - 150, 100, 150, 0, new Rectangle(PREF_W, GROUND), maxCoreHealth);
       enemies = new ArrayList<Enemy>();
       for (int i = 0; i < 5; i++) {
@@ -339,14 +354,13 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 
    @Override
    public void keyPressed(KeyEvent e) {
-      if (gameState == 1) {
+      
+      if (gameState == PLAYING) {
          if (e.getKeyCode() == KeyEvent.VK_UP && !player.isFalling()) {
             player.setJumping(true);
-   //         player.setFalling(false);
          }
-         if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+         if (e.getKeyCode() == KeyEvent.VK_SPACE && countdownNum <= 0) {
             player.fire();
-   //         System.out.println(player.getAmmo());
          }
          if (e.getKeyCode() == KeyEvent.VK_LEFT) {
             player.setLeft(true);
@@ -359,22 +373,19 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
             player.setFacingRight(true);
          }
       }
-      if (e.getKeyCode() == KeyEvent.VK_P && gameState == 1 && countdownNum == 0) {
-          gameState = 2;
+      if (e.getKeyCode() == KeyEvent.VK_P && gameState == PLAYING && countdownNum == 0) {
+          gameState = PAUSED;
       }
-      else if (e.getKeyCode() == KeyEvent.VK_P && gameState == 2) {
+      else if (e.getKeyCode() == KeyEvent.VK_P && gameState == PAUSED) {
          countdownNum = 3;
          countdown.reset();
-         gameState = 1;
+         gameState = PLAYING;
       }
+      
    }
 
    @Override
    public void keyReleased(KeyEvent e) {
-//      if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-//         player.setJumping(false);
-//         player.setFalling(true);
-//      }
       if (e.getKeyCode() == KeyEvent.VK_LEFT) {
          player.setLeft(false);
       }
@@ -385,25 +396,14 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 
    @Override
    public void actionPerformed(ActionEvent e) {
-      if (e.getSource() == utilities[0]) {
-         countdown.reset();
-         gameState = 1;
-      }
-      else if (e.getSource() == utilities[1]) {
-         System.exit(0);
-      }
-      else if (e.getSource() == restart) {
-         gameState = 1;
-         reset();
-         this.removeAll();
-      }
-//      if (e.getSource() instanceof Timer)
-//         System.out.println("okay");
-      else if (e.getSource() == timer) {
+      if (e.getSource() == timer) {
          if (isGameOver()) {
-//            gameState = 2;
-            this.add(restart);
-            this.revalidate();
+            try {
+               if (score > highScore)
+                  saveHighScore();
+            } catch (IOException ex) {
+               ex.printStackTrace();
+            }
             timer.stop();
          }
          update();
@@ -412,22 +412,44 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 
    @Override
    public void mousePressed(MouseEvent e) {
-      
-      // little button stuff
-      
-      
-//      System.out.println("PRESSING");
-//      for (JButton b : utilities) {
-//         b.setPreferredSize(new Dimension(100, 40));
-//         b.setAlignmentX(JButton.CENTER_ALIGNMENT);
-//         b.addActionListener(this);
-//         this.add(b);
-//      }
    }
 
    @Override
    public void mouseReleased(MouseEvent e)
    {
+      // make the custom buttons work
+      
+      Point clicked = e.getPoint();
+      
+      for (MyButton b : utilities) {
+         if (b.getSelfBounds().contains(clicked) && gameState == TITLE_SCREEN) {
+            if (b == utilities[0]) {
+               countdown.reset();
+               gameState = PLAYING;
+            }
+            else if (b == utilities[2]) {
+               System.exit(0);
+            }
+//            System.out.println("clicking button");
+         }
+         
+      }
+      
+      for (MyButton b : ending) {
+         if (b.getSelfBounds().contains(clicked) && isGameOver()) {
+            if (b == ending[0]) {
+               gameState = PLAYING;
+               reset();
+            }
+            else if (b == ending[1]) {
+               gameState = TITLE_SCREEN;
+               reset();
+               repaint();
+            }
+            System.out.println("clicking button");
+         } 
+      }
+      
    }
 
    @Override
@@ -455,7 +477,7 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
    private static void createAndShowGUI() {
       GamePanel gamePanel = new GamePanel();
 
-      JFrame frame = new JFrame("Frame Template");
+      JFrame frame = new JFrame("Nuclear Siege");
 //      frame.setLayout(null);
       frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
       frame.getContentPane().add(gamePanel);

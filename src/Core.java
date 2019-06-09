@@ -2,6 +2,8 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
 
+import javax.swing.JPanel;
+
 //May 24, 2019
 
 public class Core extends Tangible {
@@ -14,7 +16,7 @@ public class Core extends Tangible {
    }
 
    @Override
-   public void drawPiece(Graphics2D g2) {
+   public void drawPiece(Graphics2D g2, JPanel panel) {
       g2.fillRect((int) x, (int) y, (int) width, (int) height); 
    }
 
