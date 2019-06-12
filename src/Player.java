@@ -1,6 +1,7 @@
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -97,8 +98,11 @@ public class Player extends Tangible {
       int drawWidth = (int) (facingRight ? width : -width);
       int drawX = (int) (drawWidth < 0 ? x + width : x);
       g2.drawImage(animation.getImage(), drawX, (int) y, drawWidth, (int) height, panel);
-      g2.drawImage(helmetAnimation.getImage(), drawX + 1, (int) y, drawWidth - 3, 9, panel);
-      g2.drawImage(gunSprite, drawX + 10, (int) y + 21, (int) (gunSprite.getWidth() * (this.getWidth() / 13.0) / 1.2), (int) ( (this.getHeight() / 16.0) * gunSprite.getHeight() / 1.5 ), panel);
+//      g2.drawImage(helmetAnimation.getImage(), drawX + 1, (int) y, drawWidth - 3, 9, panel);
+      
+      int drawGunWidth = (int) (facingRight ? (gunSprite.getWidth() * (this.getWidth() / 13.0) / 1.2) : -(gunSprite.getWidth() * (this.getWidth() / 13.0) / 1.2));
+      int drawGunX = (int) (drawGunWidth < 0 ? drawX - 10 : drawX + 10);
+      g2.drawImage(gunSprite, drawGunX, (int) y + 21, (int) drawGunWidth, (int) ( (this.getHeight() / 16.0) * gunSprite.getHeight() / 1.5 ), panel);
    }
    
    public void update() {
@@ -141,6 +145,13 @@ public class Player extends Tangible {
          animation.setDelay(-1);
       }
       
+//      if (isOnPlatform) {
+//         falling = false;
+//      }
+//      else if (!isOutOfBounds() && !isOnPlatform) {
+//         falling = true;
+//      }
+      
       if (isOutOfBoundsX()) {
          animation.setFrames(idleSprites);
          animation.setDelay(-1);
@@ -178,6 +189,33 @@ public class Player extends Tangible {
       
       if (health < 0) health = 0;
       
+   }
+   
+   public void checkPlatform(Platform[] p) {
+      int under = 0;
+      for (Platform platform : p) {
+//         if (platform.getSelfBounds().intersects((Rectangle2D) this.getSelfBounds()) && this.getDy() > 0) {
+//            this.setY(y - this.getHeight());
+////            p.setFalling(false);
+//            this.setOnPlatform(true);
+//            this.setFalling(false);
+////            System.out.println("okay");
+//            System.out.println(this.isFalling());
+//         }
+         if (!falling && platform.getY() - this.getHeight() != this.getY() && (this.getX() >= platform.getX() && this.getX() <= platform.getX() + platform.getWidth())) {
+//         if (this.y - p.getHeight() != p.getY() && (p.getX() < x || p.getX() > x + width)) {
+            System.out.println("okay");
+            this.setY(platform.getY() - this.getHeight());
+            under++;
+//            p.setFalling(true);
+         }
+      }
+      if (under > 0) {
+         isOnPlatform = true;
+      }
+      else {
+         isOnPlatform = false;
+      }
    }
    
    public void fire() {

@@ -35,13 +35,18 @@ public class Platform implements GamePiece {
          p.setOnPlatform(true);
          p.setFalling(false);
 //         System.out.println("okay");
-         System.out.println(p.isOnPlatform());
+         System.out.println(p.isFalling());
       }
-      else if ((p.getX() < x || p.getX() > x + width) && p.isOnPlatform()) {
-         System.out.println("bruh");
-         p.setOnPlatform(false);
-         p.setFalling(true);
+      if ((p.getX() >= x && p.getX() <= x + width) && p.getDy() > 0) {
+//      if (this.y - p.getHeight() != p.getY() && (p.getX() < x || p.getX() > x + width)) {
+         System.out.println("okay");
+//         p.setFalling(true);
       }
+//      else if ((p.getX() < x || p.getX() > x + width) && p.isOnPlatform()) {
+//         System.out.println("bruh");
+//         p.setOnPlatform(false);
+//         p.setFalling(true);
+//      }
    }
 
    @Override

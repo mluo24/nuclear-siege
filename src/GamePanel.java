@@ -25,17 +25,21 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
    private static final int TITLE_SCREEN = 0;
    private static final int PLAYING = 1;
    private static final int PAUSED = 2;
+   private static final int INSTRUCTIONS = 3;
    
    // panel utilities
 //   private RenderingHints hints = new RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+//   private Font font = new Font("m5x7", Font.PLAIN, 40);
    private Font font = new Font("m5x7", Font.PLAIN, 40);
+   private Font titleFont = new Font("m5x7", Font.PLAIN, 100);
    private Font countdownFont = new Font("Verdana", Font.PLAIN, 250);
    private String highScoreFile = "src/highscore.txt";
    private MyButton[] utilities = {new MyButton(PREF_W / 2 - 50, PREF_H / 2 + 10, 100, 50, "Play"), 
          new MyButton(PREF_W / 2 - 100, PREF_H / 2 + 100, 200, 50, "How to Play"),
          new MyButton(PREF_W / 2 - 50, PREF_H / 2 + 190, 100, 50, "Exit")};
    private MyButton[] ending = {new MyButton(PREF_W / 2 - 50, PREF_H / 2 + 10, 100, 50, "Restart"), 
-         new MyButton(PREF_W / 2 - 50, PREF_H / 2 + 100, 100, 50, "Title")};;
+         new MyButton(PREF_W / 2 - 50, PREF_H / 2 + 100, 100, 50, "Title")};
+   private MyButton back = new MyButton(50, 50, 100, 50, "Back");
    private BufferedImage titleBg, background;
    
    // game elements
@@ -88,17 +92,6 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
       g2.setFont(font);
       g2.setColor(Color.WHITE);
       
-      if (gameState == TITLE_SCREEN) {
-         g2.drawImage(titleBg, 0, 0, PREF_W, PREF_H, this);
-         for (MyButton b : utilities) {
-            b.drawPiece(g2, this);
-         }
-//         for (int i = 0; i < player.getMovingSprites().length; i++) {
-//            BufferedImage img = player.getMovingSprites()[i];
-//            g2.drawImage(img, (img.getWidth() * 5 + 20) * i + 50, 10, img.getWidth() * 5, img.getHeight() * 5, this);
-//         }
-      }
-      
       // font metrics
       String message = "";
       FontMetrics fm = g2.getFontMetrics();
@@ -110,15 +103,45 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
       
       //PAINT TO THE PANEL HERE
       if (gameState == TITLE_SCREEN) {
-         message = "GAME TITLE";
+                  
+         g2.drawImage(titleBg, 0, 0, PREF_W, PREF_H, this);
+         for (MyButton b : utilities) {
+            b.drawPiece(g2, this);
+         }
+         
+         g2.setFont(titleFont);
+         g2.setColor(Color.WHITE);
+         
+         message = "NUCLEAR";
+         fm = g2.getFontMetrics();
+         msgHeight = fm.getHeight();
          msgWidth = fm.stringWidth(message);
          messageX = PREF_W / 2 - msgWidth / 2;
+         g2.drawString(message, messageX , messageY - 100);
+         
+         message = "SIEGE";
+         msgWidth = fm.stringWidth(message);
+         messageX = PREF_W / 2 - msgWidth / 2;
+         
+         g2.setFont(titleFont);
          g2.drawString(message, messageX , messageY);
          
+//         for (int i = 0; i < enemies.get(0).getAttackingSprites().length; i++) {
+//            BufferedImage img = enemies.get(0).getAttackingSprites()[i];
+//            g2.drawImage(img, (img.getWidth() * 4 + 20) * i, 10, img.getWidth() * 4, img.getHeight() * 4, this);
+//         }
+         
+      }
+      
+      if (gameState == INSTRUCTIONS) {
+         g2.drawImage(titleBg, 0, 0, PREF_W, PREF_H, this);
+         showInstructions(g2);
+         back.drawPiece(g2, this);
       }
 
       // top UI
       if (gameState == PLAYING || gameState == PAUSED) {
+         
          super.paintComponent(g);
          g2.drawImage(background, 0, 0, PREF_W, PREF_H, this);
          message = "High Score: " + highScore;
@@ -200,11 +223,11 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
          message = "Game Over!";
          msgWidth = fm.stringWidth(message);
          messageX = PREF_W / 2 - msgWidth / 2;
-         g2.drawString(message, messageX, PREF_H / 2 - 20);
+         g2.drawString(message, messageX, PREF_H / 2 - msgHeight * 3);
          message = "Final Score: " + score;
          msgWidth = fm.stringWidth(message);
          messageX = PREF_W / 2 - msgWidth / 2;
-         g2.drawString(message, messageX, PREF_H / 2 + 20);
+         g2.drawString(message, messageX, PREF_H / 2 - msgHeight * 2);
          
          for (MyButton b : ending) {
             b.drawPiece(g2, this);
@@ -234,7 +257,7 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
                }
             }
             int count = 0;
-            if (score % 100 == 0) {
+            if (score % 250 == 0) {
                if (enemyTimer.getDelay() < 1000) {
                   enemyTimer.setDelay(1000);
                }
@@ -259,9 +282,10 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
                   player.setInvincible(false);
                }
             }
-            for (Platform p : platforms) {
-               p.playerUpdate(player);
-            }
+//            for (Platform p : platforms) {
+//               p.playerUpdate(player);
+//            }
+//            player.checkPlatform(platforms);
 //            System.out.println(player.isOnPlatform());
             score = (int) scoreKeeper.getElapsed();
             player.update();
@@ -272,11 +296,24 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
       
    }
    
-   private void generateLevel() {
-      
-   }
+//   private void generateLevel() {
+//      
+//   }
    
-   private void showInstructions() {
+   private void showInstructions(Graphics2D g2) {
+      
+      String[] instructions = {"The nuclear plant you work at had a huge accident,", "turning most things around you into mutants.", "They are out to attack you and destroy the nuclear reactor,", "which will instantly kill you if destroyed.", "Fight off the siege of enemies and save yourself!",
+      "Use the left and right arrow keys to move and space bar to shoot.", "To jump onto platforms, press the up arrow keys",
+      "If you or the core health run out, you lose."};
+      
+      for (int i = 0; i < instructions.length; i++) {
+         FontMetrics fm = g2.getFontMetrics();
+         int msgWidth = fm.stringWidth(instructions[i]);
+         int msgHeight = fm.getHeight();
+         int messageX = PREF_W / 2 - msgWidth / 2;
+         int messageY = PREF_H / 2 - msgHeight / 2 - 100;
+         g2.drawString(instructions[i], messageX, messageY + i * 40);
+      }
       
    }
    
@@ -321,7 +358,7 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
    
    private void addEnemy() {
       int assign = ((int) (Math.random() * 2) ) == 0 ? 0 - ((int) (Math.random() * 10) + 40) : PREF_W + (int) (Math.random() * 10);
-      enemies.add(new Enemy(assign, GROUND - 75, 40, 75, (Math.random() * 3) + 2, new Rectangle(PREF_W, GROUND), 10));
+      enemies.add(new Enemy(assign, GROUND - 75, 75, 75, (Math.random() * 3) + 2, new Rectangle(PREF_W, GROUND), 10));
       Enemy latest = enemies.get(enemies.size() - 1);
       if (latest.getX() >= GROUND) latest.setDx(-latest.getMoveSpeed());
    }
@@ -421,11 +458,18 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
       
       Point clicked = e.getPoint();
       
+      if (back.getSelfBounds().contains(clicked) && gameState == INSTRUCTIONS) {
+         gameState = TITLE_SCREEN;
+      }
+      
       for (MyButton b : utilities) {
          if (b.getSelfBounds().contains(clicked) && gameState == TITLE_SCREEN) {
             if (b == utilities[0]) {
                countdown.reset();
                gameState = PLAYING;
+            }
+            else if (b == utilities[1]) {
+               gameState = INSTRUCTIONS;
             }
             else if (b == utilities[2]) {
                System.exit(0);
